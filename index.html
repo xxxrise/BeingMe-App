@@ -807,7 +807,7 @@ try{document.fonts&&document.fonts.ready.then(()=>{navK='';post()})}catch(e){}
  nav.addEventListener('pointerup',end);nav.addEventListener('pointercancel',end);
  nav.addEventListener('click',e=>{if(Date.now()-sup<400){e.stopPropagation();e.preventDefault()}},true)})();
 (function(){const R=document.documentElement,isT=el=>el&&el.matches&&el.matches('textarea,[contenteditable="true"],input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]):not([type=color])');
- const nudge=()=>{requestAnimationFrame(()=>{window.scrollTo(window.scrollX,window.scrollY);if(window.visualViewport&&visualViewport.offsetTop>0)window.scrollBy(0,0)})};
+ const kick=()=>{const y=window.scrollY,mx=Math.max(0,document.documentElement.scrollHeight-innerHeight);window.scrollTo(0,Math.min(y,mx)+(y>0?-1:1));requestAnimationFrame(()=>window.scrollTo(0,Math.min(y,mx)))};let nt=[];const nudge=()=>{nt.forEach(clearTimeout);nt=[0,120,320,650].map(t=>setTimeout(()=>{if(!isT(document.activeElement))kick()},t))};
  const sync=()=>{if(isT(document.activeElement))R.classList.add('kb');else if(R.classList.contains('kb')){R.classList.remove('kb');nudge()}};
  document.addEventListener('focusin',e=>{if(isT(e.target))R.classList.add('kb')});
  document.addEventListener('focusout',()=>setTimeout(sync,80));
