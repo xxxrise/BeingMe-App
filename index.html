@@ -160,13 +160,16 @@ select{width:100%;background:var(--soft);border:2px solid transparent;border-rad
 <style>:root{--tgb:0px;--nb:max(10px,calc(max(env(safe-area-inset-bottom,0px),var(--tgb)) - 12px));--st:env(safe-area-inset-top,0px);--tgs:env(safe-area-inset-top,0px);--tgc:0px}html.tg{--st:calc(max(var(--tgs),env(safe-area-inset-top,0px)) + var(--tgc))}</style>
 <script>(function(){try{var q=location.hash+'&'+location.search,R=document.documentElement;
  if(!(/tgWebApp/.test(q)||window.TelegramWebviewProxy))return;R.classList.add('tg');
- if(/tgWebAppFullscreen=1/.test(q))R.style.setProperty('--tgc','46px');
- var s=document.createElement('script');s.src='https://telegram.org/js/telegram-web-app.js';s.async=true;
- s.onload=function(){try{var w=window.Telegram&&Telegram.WebApp;if(!w)return;
-  var ap=function(){var a=w.safeAreaInset||{},c=w.contentSafeAreaInset||{};if(a.top!=null)R.style.setProperty('--tgs',(a.top|0)+'px');if(a.bottom!=null)R.style.setProperty('--tgb',(a.bottom|0)+'px');R.style.setProperty('--tgc',(w.isFullscreen||c.top?(c.top|0):0)+'px')};
-  ap();['safeAreaChanged','contentSafeAreaChanged','fullscreenChanged','viewportChanged'].forEach(function(e){try{w.onEvent(e,ap)}catch(_){}});
-  try{var sc=getComputedStyle(R).getPropertyValue('--stc').trim();if(sc&&w.setBackgroundColor)w.setBackgroundColor(sc)}catch(_){}try{w.ready()}catch(_){}try{w.expand()}catch(_){}try{w.disableVerticalSwipes&&w.disableVerticalSwipes()}catch(_){}
- }catch(e){}};document.head.appendChild(s)}catch(e){}})();</script>
+ var fs=/tgWebAppFullscreen=1/.test(q),ios=/tgWebAppPlatform=ios/.test(q)||/iPhone|iPad/.test(navigator.userAgent),hb=ios&&Math.max(screen.height,screen.width)>=812?34:0,sa={},ca={};
+ var post=window.__tgPost=function(t,d){try{var s=JSON.stringify(d||{});if(window.TelegramWebviewProxy)TelegramWebviewProxy.postEvent(t,s);else if(window.external&&'notify' in window.external)window.external.notify(JSON.stringify({eventType:t,eventData:d||{}}));else if(window.parent!==window)parent.postMessage(JSON.stringify({eventType:t,eventData:d||{}}),'*')}catch(e){}};
+ var ap=function(){R.style.setProperty('--tgs',(sa.top|0)+'px');R.style.setProperty('--tgc',(fs?(ca.top!=null?ca.top|0:46):0)+'px');R.style.setProperty('--tgb',Math.max((sa.bottom|0)+(ca.bottom|0),hb)+'px')};
+ var rcv=function(t,d){try{if(typeof d==='string')d=JSON.parse(d)}catch(e){}d=d||{};
+  if(t==='safe_area_changed'){sa=d;ap()}else if(t==='content_safe_area_changed'){ca=d;ap()}else if(t==='fullscreen_changed'){fs=!!d.is_fullscreen;ap()}};
+ window.Telegram=window.Telegram||{};var W=window.Telegram.WebView=window.Telegram.WebView||{};var pr=W.receiveEvent;W.receiveEvent=function(t,d){rcv(t,d);if(pr)try{pr(t,d)}catch(e){}};
+ window.TelegramGameProxy=window.TelegramGameProxy||{receiveEvent:W.receiveEvent};
+ window.addEventListener('message',function(e){try{var m=typeof e.data==='string'?JSON.parse(e.data):e.data;if(m&&m.eventType)rcv(m.eventType,m.eventData)}catch(_){}});
+ ap();post('web_app_ready');post('web_app_expand');post('web_app_setup_swipe_behavior',{allow_vertical_swipe:false});post('web_app_request_safe_area');post('web_app_request_content_safe_area');
+}catch(e){}})();</script>
 </head>
 <body>
 <div id="app">
@@ -861,7 +864,7 @@ function ach(s){[[7,'r7','Серия 7 дней! Новая награда: ме
 function petTap(){const l=PETL[S.eq.pet]||['...'];say(pick(l));const e=$('#pet');e.classList.remove('a-hp');void e.offsetWidth;e.classList.add('a-hp');sfx('purr')}
 function roomSVG(eq,vb){const g=k=>eq[k]&&I[eq[k]]?I[eq[k]].d:'';return `<svg viewBox='${vb||'0 0 400 210'}' preserveAspectRatio='xMidYMax meet' xmlns='http://www.w3.org/2000/svg'>${g('wall')}${g('rug')}${g('plant')}${g('lamp')}</svg>`}
 function prev(id){const it=I[id];if(it.k==='pet')return `<svg viewBox='0 0 52 46'>${it.d}</svg>`;if(['rug','wall','plant','lamp'].includes(it.k))return roomSVG({[it.k]:id},it.vb).replace('<svg ',"<svg style='width:100%;height:100%' ");return char({...S.eq,[it.k]:id},VB[it.k]||VB.color)}
-function stage(){$('#char').innerHTML=char(S.eq,null,true);{const sb=(darkNow()?'linear-gradient(rgba(24,19,44,.5),rgba(24,19,44,.5)),':'')+I[S.eq.bg].d;$('#stage').style.background=sb;const R=document.documentElement;R.style.setProperty('--stbg',sb);const m=/#([0-9a-f]{6})/i.exec(I[S.eq.bg].d);if(m){let n=parseInt(m[1],16),r=n>>16,g=n>>8&255,b=n&255;if(darkNow()){r=(r+24)/2|0;g=(g+19)/2|0;b=(b+44)/2|0}const c='#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);R.style.setProperty('--stc',c);const tm=document.getElementById('thc');if(tm)tm.setAttribute('content',c);try{const w=window.Telegram&&Telegram.WebApp;if(w&&w.setBackgroundColor)w.setBackgroundColor(c)}catch(e){}}}$('#room').innerHTML=roomSVG(S.eq);const p=S.eq.pet&&I[S.eq.pet],e=$('#pet');e.style.display=p?'block':'none';e.innerHTML=p?`<svg viewBox='0 0 52 46'>${p.d}</svg>`:''}
+function stage(){$('#char').innerHTML=char(S.eq,null,true);{const sb=(darkNow()?'linear-gradient(rgba(24,19,44,.5),rgba(24,19,44,.5)),':'')+I[S.eq.bg].d;$('#stage').style.background=sb;const R=document.documentElement;R.style.setProperty('--stbg',sb);const m=/#([0-9a-f]{6})/i.exec(I[S.eq.bg].d);if(m){let n=parseInt(m[1],16),r=n>>16,g=n>>8&255,b=n&255;if(darkNow()){r=(r+24)/2|0;g=(g+19)/2|0;b=(b+44)/2|0}const c='#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);R.style.setProperty('--stc',c);const tm=document.getElementById('thc');if(tm)tm.setAttribute('content',c);try{window.__tgPost&&__tgPost('web_app_set_background_color',{color:c})}catch(e){}}}$('#room').innerHTML=roomSVG(S.eq);const p=S.eq.pet&&I[S.eq.pet],e=$('#pet');e.style.display=p?'block':'none';e.innerHTML=p?`<svg viewBox='0 0 52 46'>${p.d}</svg>`:''}
 function focBar(t){return t.fm?`<small>${ic('timer',12)} ${t.fm} мин в фокусе</small>`:''}
 function pdone(skip){const t=S.pt,p=S.pm,k=today();if(p.d!==k){p.d=k;p.cnt=0;p.min=0}
  if(t.ph==='f'){if(!skip){const m=p.f,c=Math.floor(m/5),tk=S.tasks.find(x=>x.id===t.task);p.cnt++;p.min+=m;S.hist=S.hist||{};(S.hist[k]=S.hist[k]||{f:0,n:0}).f+=m;S.hist[k].n++;if(tk){tk.fm=(tk.fm||0)+m;tk.fs=(tk.fs||0)+1}gain(c,Math.round(m/2));stUp('dis',1);toast((c?'Фокус завершён! +'+c+' '+cwN(c):'Фокус завершён!')+(tk?' · +'+m+' мин к «'+tk.n.slice(0,20)+'»':''));react('focus')}t.cyc++;t.ph=t.cyc%p.n===0?'l':'s'}else t.ph='f';
