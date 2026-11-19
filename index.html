@@ -90,6 +90,7 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .nav{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:var(--nb);width:min(420px,calc(100% - 12px));display:grid;grid-template-columns:1fr 1fr 40px 40px 1fr 1fr;background:var(--sheet);border-radius:26px;padding:5px;box-shadow:var(--sh)}
 .nav button{position:relative;z-index:1;padding:11px 0;font-size:12px;font-weight:800;color:var(--mute);transition:color .3s}
 .nav button.on{color:var(--acc)}
+.nav{touch-action:none}.nav.drg button.on{color:var(--mute)}.nav.drg button.hv{color:var(--acc)}.nav.drg .ind{transition:transform .28s cubic-bezier(.3,1.25,.5,1),width .2s}
 .ind{position:absolute;top:5px;bottom:5px;left:5px;width:20%;background:var(--accsoft);border-radius:21px;transition:transform .5s cubic-bezier(.3,1.3,.5,1),width .3s}
 .toast{position:fixed;z-index:6;left:50%;bottom:calc(72px + var(--nb));transform:translate(-50%,20px);background:var(--ink);color:var(--sheet);padding:10px 18px;border-radius:18px;font-weight:700;opacity:0;pointer-events:none;transition:.35s;width:max-content;max-width:min(420px,calc(100% - 32px));box-sizing:border-box;text-align:center;line-height:1.3}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -156,13 +157,13 @@ select{width:100%;background:var(--soft);border:2px solid transparent;border-rad
 .fs{position:absolute;z-index:2;top:14px;left:0;right:0;text-align:center;font-size:42px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(59,53,85,.3);pointer-events:none}.fh{position:absolute;z-index:1;left:52px;top:0;height:64px;will-change:transform}.pr{transform-box:fill-box;transform-origin:center;animation:prop .12s linear infinite}@keyframes prop{50%{transform:scaleY(.35)}}.jm{animation:jm .3s ease-out}@keyframes jm{40%{transform:translateY(-6px)}}.fh svg{height:100%;width:auto;overflow:visible}.pl{position:absolute;z-index:1;left:0;top:0;width:56px;height:100%;will-change:transform}.pl i{position:absolute;left:0;width:56px;background:linear-gradient(90deg,#B7AAE8,#D6CEF5)}.pl i.t{top:0;border-radius:0 0 16px 16px}.pl i.b{bottom:0;border-radius:16px 16px 0 0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-<style>:root{--nb:max(10px,calc(env(safe-area-inset-bottom,0px) - 12px));--st:env(safe-area-inset-top,0px);--tgs:env(safe-area-inset-top,0px);--tgc:0px}html.tg{--st:calc(max(var(--tgs),env(safe-area-inset-top,0px)) + var(--tgc))}</style>
+<style>:root{--tgb:0px;--nb:max(10px,calc(max(env(safe-area-inset-bottom,0px),var(--tgb)) - 12px));--st:env(safe-area-inset-top,0px);--tgs:env(safe-area-inset-top,0px);--tgc:0px}html.tg{--st:calc(max(var(--tgs),env(safe-area-inset-top,0px)) + var(--tgc))}</style>
 <script>(function(){try{var q=location.hash+'&'+location.search,R=document.documentElement;
  if(!(/tgWebApp/.test(q)||window.TelegramWebviewProxy))return;R.classList.add('tg');
  if(/tgWebAppFullscreen=1/.test(q))R.style.setProperty('--tgc','46px');
  var s=document.createElement('script');s.src='https://telegram.org/js/telegram-web-app.js';s.async=true;
  s.onload=function(){try{var w=window.Telegram&&Telegram.WebApp;if(!w)return;
-  var ap=function(){var a=w.safeAreaInset||{},c=w.contentSafeAreaInset||{};if(a.top!=null)R.style.setProperty('--tgs',(a.top|0)+'px');R.style.setProperty('--tgc',(w.isFullscreen||c.top?(c.top|0):0)+'px')};
+  var ap=function(){var a=w.safeAreaInset||{},c=w.contentSafeAreaInset||{};if(a.top!=null)R.style.setProperty('--tgs',(a.top|0)+'px');if(a.bottom!=null)R.style.setProperty('--tgb',(a.bottom|0)+'px');R.style.setProperty('--tgc',(w.isFullscreen||c.top?(c.top|0):0)+'px')};
   ap();['safeAreaChanged','contentSafeAreaChanged','fullscreenChanged','viewportChanged'].forEach(function(e){try{w.onEvent(e,ap)}catch(_){}});
   try{var sc=getComputedStyle(R).getPropertyValue('--stc').trim();if(sc&&w.setBackgroundColor)w.setBackgroundColor(sc)}catch(_){}try{w.ready()}catch(_){}try{w.expand()}catch(_){}try{w.disableVerticalSwipes&&w.disableVerticalSwipes()}catch(_){}
  }catch(e){}};document.head.appendChild(s)}catch(e){}})();</script>
@@ -791,6 +792,18 @@ function detDlg(k,id){let o;if(k==='t')o=S.tasks.find(x=>x.id===id);else{const f
 var navK;
 function post(){const b=$('.nav button.on'),i=$('#ind');i.style.opacity=b?1:0;const k=b?b.dataset.id+'|'+innerWidth:'';if(b&&k!==navK){navK=k;requestAnimationFrame(()=>{i.style.width=b.offsetWidth+'px';i.style.transform=`translateX(${b.offsetLeft-5}px)`})}updPom()}
 try{document.fonts&&document.fonts.ready.then(()=>{navK='';post()})}catch(e){}
+(function(){const nav=$('#nav'),ind=$('#ind');let dr=null,sup=0;
+ const bts=()=>[...nav.querySelectorAll('button')];
+ const at=x=>{let best=null,bd=1e9;for(const b of bts()){const r=b.getBoundingClientRect(),d=x<r.left?r.left-x:x>r.right?x-r.right:0;if(d<bd){bd=d;best=b}}return best};
+ const show=b=>{ind.style.opacity=1;ind.style.width=b.offsetWidth+'px';ind.style.transform=`translateX(${b.offsetLeft-5}px) scale(1.07)`;bts().forEach(x=>x.classList.toggle('hv',x===b))};
+ nav.addEventListener('pointerdown',e=>{dr={x0:e.clientX,b:at(e.clientX),mv:false,id:e.pointerId}});
+ nav.addEventListener('pointermove',e=>{if(!dr)return;if(!dr.mv){if(Math.abs(e.clientX-dr.x0)<8)return;dr.mv=true;try{nav.setPointerCapture(dr.id)}catch(_){}nav.classList.add('drg');show(dr.b)}
+  const b=at(e.clientX);if(b&&b!==dr.b){dr.b=b;hap('l');show(b)}});
+ const end=()=>{if(!dr)return;const d=dr;dr=null;nav.classList.remove('drg');bts().forEach(x=>x.classList.remove('hv'));if(!d.mv)return;sup=Date.now();
+  const id=d.b&&d.b.dataset.id;if(id&&(id!==tab||G)){sfx('tap');stopGame();tab=id;edit=false;render(true)}else{navK='';post()}};
+ nav.addEventListener('pointerup',end);nav.addEventListener('pointercancel',end);
+ nav.addEventListener('click',e=>{if(Date.now()-sup<400){e.stopPropagation();e.preventDefault()}},true)})();
+
 function rvData(off){const t0=today(),ws=addDays(monStart(t0),-7*off),days=Array.from({length:7},(_,i)=>addDays(ws,i)),H=S.habits,hs=S.hist||{};
  return{days,hd:days.map(d=>H.filter(h=>h.days[d]).length),hp:days.map(d=>d>t0?0:H.filter(h=>!h.c||h.c<=d).length),tp:days.map(d=>S.tasks.filter(t=>t.dt===d).length),td:days.map(d=>S.tasks.filter(t=>t.dt===d&&t.done).length),f:days.map(d=>hs[d]&&hs[d].f||0),n:days.map(d=>hs[d]&&hs[d].n||0),c:days.map(d=>hs[d]&&hs[d].c||0)}}
 function reviewV(){const r=rvData(rvW),pv=rvData(rvW+1),t0=today(),H=S.habits,hs=sm(r.hd),hp=sm(r.hp),ts=sm(r.td),tp=sm(r.tp),fm=sm(r.f),fn=sm(r.n),cc=sm(r.c),hpct=hp?Math.round(hs/hp*100):0,tpct=tp?Math.round(ts/tp*100):0,pp=sm(pv.hp)?Math.round(sm(pv.hd)/sm(pv.hp)*100):null;
