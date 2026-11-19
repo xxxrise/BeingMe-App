@@ -170,7 +170,7 @@ select{width:100%;background:var(--soft);border:2px solid transparent;border-rad
  window.Telegram=window.Telegram||{};var W=window.Telegram.WebView=window.Telegram.WebView||{};var pr=W.receiveEvent;W.receiveEvent=function(t,d){rcv(t,d);if(pr)try{pr(t,d)}catch(e){}};
  window.TelegramGameProxy=window.TelegramGameProxy||{receiveEvent:W.receiveEvent};
  window.addEventListener('message',function(e){try{var m=typeof e.data==='string'?JSON.parse(e.data):e.data;if(m&&m.eventType)rcv(m.eventType,m.eventData)}catch(_){}});
- ap();post('web_app_ready');post('web_app_expand');post('web_app_setup_swipe_behavior',{allow_vertical_swipe:false});post('web_app_request_safe_area');post('web_app_request_content_safe_area');
+ ap();post('web_app_ready');post('web_app_expand');post('web_app_setup_swipe_behavior',{allow_vertical_swipe:false});post('web_app_request_safe_area');post('web_app_request_content_safe_area');var pm=/tgWebAppPlatform=([a-z_]+)/.exec(q),mob=pm?/^(ios|android|android_x)$/.test(pm[1]):/iPhone|iPad|iPod|Android/.test(navigator.userAgent);if(mob&&!fs)post('web_app_request_fullscreen');
 }catch(e){}})();</script>
 </head>
 <body>
