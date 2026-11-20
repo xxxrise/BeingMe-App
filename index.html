@@ -333,8 +333,13 @@ function musTick(hz){const M=MU;if(!M)return;const a=M.a,e=60/MZ.bpm/2;
 function musOn(){if(musT||!ac())return;const a=AC;if(!MU)MU=musBuild(a);const M=MU,g=M.out.gain;M.next=Math.max(M.next,a.currentTime+.1);g.cancelScheduledValues(a.currentTime);g.setValueAtTime(g.value,a.currentTime);g.linearRampToValueAtTime(MZ.vol,a.currentTime+2.5);musTick();musT=setInterval(musTick,200)}
 function musOff(){clearInterval(musT);musT=0;if(MU){const a=MU.a,g=MU.out.gain;g.cancelScheduledValues(a.currentTime);g.setValueAtTime(g.value,a.currentTime);g.linearRampToValueAtTime(0,a.currentTime+.8)}}
 function applyMus(){S.snd.mus?musOn():musOff()}
-document.addEventListener('pointerdown',()=>{if(S.snd.mus&&!musT)musOn()});
-document.addEventListener('visibilitychange',()=>document.hidden?musOff():applyMus());
+let auSl=0;
+function audioSleep(){auSl=1;clearInterval(musT);musT=0;try{if(MU){const a=MU.a,g=MU.out.gain;g.cancelScheduledValues(a.currentTime);g.setValueAtTime(g.value,a.currentTime);g.linearRampToValueAtTime(0,a.currentTime+.06)}if(AC&&AC.state==='running')setTimeout(()=>{if(auSl&&AC&&AC.state==='running')AC.suspend().catch(()=>{})},90)}catch(e){}}
+function audioWake(){if(!auSl)return;auSl=0;try{if(AC&&AC.state==='suspended')AC.resume().catch(()=>{})}catch(e){}applyMus()}
+document.addEventListener('pointerdown',()=>{if(auSl)audioWake();else if(AC&&AC.state==='suspended')AC.resume().catch(()=>{});if(S.snd.mus&&!musT)musOn()});
+document.addEventListener('visibilitychange',()=>document.hidden?audioSleep():audioWake());
+window.addEventListener('pagehide',audioSleep);window.addEventListener('pageshow',e=>{if(e.persisted)audioWake()});
+document.addEventListener('freeze',audioSleep);
 const BOSS=`<svg viewBox='0 0 120 100'><ellipse cx='60' cy='94' rx='40' ry='6' fill='rgba(59,53,85,.14)'/><path d='M18 90C6 50 28 10 60 10s56 40 42 80z' fill='#9C93B8'/><path d='M38 50q7 6 14 0M68 50q7 6 14 0' fill='none' stroke='#3B3555' stroke-width='3' stroke-linecap='round'/><ellipse cx='60' cy='68' rx='7' ry='4' fill='#3B3555'/><text x='94' y='22' font-size='16' font-weight='800' fill='#6F6890'>z</text></svg>`;
 const glist=()=>`<div class='hd'><div><h2>Игры</h2><p>Отдохни и побей свои рекорды</p></div></div><button class='gcard' data-a='play'><span class='gi'>${BOSS}</span><span class='tx'><b>Битва с ленью</b><small>Разбивай стену из кирпичей. Бесконечные уровни, бей рекорд</small></span></button><button class='gcard' data-a='play' data-id='fl'><span class='gi'>${gi('plane',46)}</span><span class='tx'><b>Полёт к цели</b><small>Пролетай между преградами. Бей рекорд</small></span></button><button class='gcard' data-a='play' data-id='tw'><span class='gi'>${gi('tower',46)}</span><span class='tx'><b>Башня воли</b><small>Строй башню из своих привычек. Бей рекорд</small></span></button><button class='gcard' data-a='play' data-id='gd'><span class='gi'>${gi('runner',46)}</span><span class='tx'><b>Режим фокуса</b><small>Держи дисциплину: обходи отвлечения и не срывайся</small></span></button><button class='gcard' data-a='play' data-id='mg'><span class='gi'>${gi('merge',46)}</span><span class='tx'><b>Слияние целей</b><small>Соединяй одинаковые дела в большие цели. Бей рекорд</small></span></button><button class='gcard' data-a='play' data-id='sl'><span class='gi'>${gi('slash',46)}</span><span class='tx'><b>Взмах воли</b><small>Рассекай отвлечения взмахом пальца, не задевая полезное</small></span></button><button class='gcard' data-a='play' data-id='kn'><span class='gi'>${gi('dart',46)}</span><span class='tx'><b>Точно в цель</b><small>Бросай дротики во вращающуюся цель и не попадай в отвлечения</small></span></button><div class='gcard soon'><span class='gi'>${gi('soon',46)}</span><span class='tx'><b>Новые игры</b><small>Скоро здесь появятся</small></span></div>`;
 function stopGame(){if(G){cancelAnimationFrame(G.raf);G=null}}
@@ -771,7 +776,11 @@ const pk=()=>({app:'habit-quest',v:DVf(),at:new Date().toISOString(),data:S}),bk
 function dataDlg(){if($('#dlg'))$('#dlg').remove();impD=null;const d=document.createElement('div');d.className='dlg';d.id='dlg';
  d.innerHTML=`<div class='dc' style='width:100%;max-width:360px;text-align:left;max-height:88vh;overflow:auto'><h3 style='text-align:center'>Данные и перенос</h3><p>Прогресс хранится на этом устройстве. Сохрани копию, чтобы перенести его на другое устройство или не потерять при обновлении.</p><p class='dh'>${S.bk?'Последняя копия: '+S.bk:'Копий ещё не было'} · версия данных ${DVf()}</p><div class='dbtn'><button class='ghost' data-a='bf'>${ic('down',16)}Сохранить в файл</button><button class='ghost' data-a='bc'>${ic('copy',16)}Скопировать код</button></div><textarea id='bx' readonly rows='3' style='display:none'></textarea><p style='margin:18px 0 6px;font-weight:800'>Загрузить прогресс</p><textarea id='bi' autocapitalize='off' autocorrect='off' spellcheck='false' rows='3' placeholder='Вставь код или выбери файл'></textarea><input type='file' id='bfi' accept='.json,.txt,text/plain,application/json' style='margin-top:8px'><p class='dh' id='bm'></p><div class='dbtn'><button class='ghost' data-a='set'>‹ Назад</button><button class='pgo' id='bgo' data-a='bi'>Проверить</button></div></div>`;document.body.appendChild(d);
  $('#bfi').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#bi').value=r.result;bkCheck()};r.readAsText(f)};$('#bi').oninput=bkCheck}
-async function bkFile(){const j=JSON.stringify(pk(),null,1);try{const d=window.claude&&await window.claude.use('downloads');if(!d)throw 0;await d.save({filename:'habit-quest-'+today()+'.json',data:j});S.bk=today();save();toast('Копия сохранена')}catch(e){if(e&&e.code==='declined')return;bkCopy(true)}}
+async function bkFile(){const j=JSON.stringify(pk(),null,1),fn='habit-quest-'+today()+'.json',ok=()=>{S.bk=today();save();toast('Копия сохранена');const p=document.querySelector('#dlg .dh');if(p)p.textContent='Последняя копия: '+S.bk+' · версия данных '+DVf()};
+ try{const d=window.claude&&await window.claude.use('downloads');if(d){await d.save({filename:fn,data:j});ok();return}}catch(e){if(e&&e.code==='declined')return}
+ try{const f=new File([j],fn,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Копия прогресса'});ok();return}}catch(e){if(e&&e.name==='AbortError')return}
+ if(!document.documentElement.classList.contains('tg')){try{const u=URL.createObjectURL(new Blob([j],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);ok();return}catch(e){}}
+ bkCopy(true)}
 function parseData(t){t=String(t).trim();let s=t;const m=t.match(/hq1[:：]\s*([A-Za-z0-9+\/=_\-\s]+)/i);
  if(m){let b=m[1].replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';try{s=decodeURIComponent(escape(atob(b)))}catch(e){throw{msg:'код обрезан или скопирован не целиком'}}}
  else{const i=s.indexOf('{'),k=s.lastIndexOf('}');if(i<0||k<i)throw{msg:'не найден код, он должен начинаться с HQ1:'};s=s.slice(i,k+1)}
@@ -959,7 +968,7 @@ async function csSync(manual){if(!CS.on||CS.busy)return;CS.st='sync';csUI();
   if(!c){CS.init=1;CS.dirty=0;if(!S.mt)S.mt=Date.now();CS.st='';await csPush();return}
   const take=c.meta.ts!==cs&&(!S.cs||!lc||c.meta.ts>=(S.mt||0));
   CS.init=1;CS.dirty=0;
-  if(take){csApply(c);CS.st='ok';CS.t=Date.now()}
+  if(take){csApply(c);CS.st='ok';CS.t=Date.now();if(CS.rescue){CS.rescue=0;const dl=$('#dlg');if(dl&&/повреждено/.test(dl.textContent))dl.remove();toast('Прогресс восстановлен из облака Telegram')}}
   else{CS.last=c.ch;if(lc||c.meta.ts!==S.mt){if(!S.mt)S.mt=Date.now();CS.st='';await csPush();return}CS.st='ok';CS.t=Date.now()}
  }catch(e){CS.st='err';if(manual)toast('Облако Telegram сейчас недоступно');if(!CS.init){clearTimeout(CS.rt);CS.rt=setTimeout(csSync,20000)}}
  csUI()}
@@ -968,7 +977,7 @@ if(CS.on){['pointerdown','keydown'].forEach(n=>document.addEventListener(n,()=>{
 var BIO={on:!!window.__tgPost&&document.documentElement.classList.contains('tg'),av:false,info:null,nm:'Face ID',w:{},hid:0,busy:0};
 const bioLK='hq-lock';const bioIsOn=()=>{try{return localStorage.getItem(bioLK)==='1'}catch(e){return false}};
 const bioSet=v=>{try{v?localStorage.setItem(bioLK,'1'):localStorage.removeItem(bioLK)}catch(e){}};
-(function(){const prev=window.__tgHook;window.__tgHook=(t,d)=>{if(prev)prev(t,d);if(/^biometry_/.test(t)){if(t==='biometry_info_received')bioInfo(d);const w=BIO.w[t];if(w){delete BIO.w[t];clearTimeout(w.t);w.res(d||{})}}}})();
+(function(){const prev=window.__tgHook;window.__tgHook=(t,d)=>{if(prev)prev(t,d);if(t==='visibility_changed'){d&&d.is_visible===false?audioSleep():audioWake()}if(/^biometry_/.test(t)){if(t==='biometry_info_received')bioInfo(d);const w=BIO.w[t];if(w){delete BIO.w[t];clearTimeout(w.t);w.res(d||{})}}}})();
 const bioWait=(ev,send,data,ms)=>new Promise(res=>{const o=BIO.w[ev];if(o){clearTimeout(o.t);o.res(null)}BIO.w[ev]={res,t:setTimeout(()=>{delete BIO.w[ev];res(null)},ms||60000)};window.__tgPost(send,data)});
 function bioInfo(d){BIO.info=d||{};BIO.av=!!(d&&d.available);BIO.nm=d&&d.type==='face'?'Face ID':d&&d.type==='finger'?'отпечатку':'биометрии'}
 function bioRow(){if(!BIO.av)return '';return `<div class='st'><span>${ic('lock')}Вход по ${BIO.nm}</span><button class='sw ${bioIsOn()?'on':''}' id='sbio' data-a='bio' aria-label='Вход по ${BIO.nm}'><i></i></button></div>`}
@@ -994,7 +1003,7 @@ async function bioToggle(){if(BIO.busy)return;BIO.busy=1;try{
  }finally{BIO.busy=0;const s=document.getElementById('sbio');if(s)s.classList.toggle('on',bioIsOn())}}
 if(BIO.on){window.__tgPost('web_app_biometry_get_info');document.addEventListener('visibilitychange',()=>{if(!bioIsOn())return;if(document.visibilityState==='hidden')BIO.hid=Date.now();else if(BIO.hid&&Date.now()-BIO.hid>180000&&!document.getElementById('lock')){lockShow();bioUnlock()}})}
 
-function init(){try{preIc();load();applyTheme();hud();snd();render();negUI();evalNeg();ach(Math.max(0,...S.habits.map(streak)));if(loadErr&&!$('#dlg'))brokenDlg();if(CS.on&&!loadErr)csSync();if(BIO.on&&bioIsOn()){lockShow();setTimeout(bioUnlock,350)}}catch(e){fatal(e)}}
+function init(){try{preIc();load();applyTheme();hud();snd();render();negUI();evalNeg();ach(Math.max(0,...S.habits.map(streak)));if(loadErr&&!$('#dlg'))brokenDlg();if(CS.on){if(loadErr){CS.rescue=1}csSync()}if(BIO.on&&bioIsOn()){lockShow();setTimeout(bioUnlock,350)}}catch(e){fatal(e)}}
 init();
 </script>
 </body>
